@@ -2,7 +2,10 @@
 title: "The Impact of film's features on IMDB Ratings: A logistic Regression approach"
 author: "Yujie Tang, Jialu FU, Weiqing GUO, Bashiru Mukaila, Wanding Wang"
 date: "2023-03-14"
-output: github_document
+output: 
+  pdf_document:
+          number_sections: yes
+fig_caption: yes
 ---
 
 ```{r setup, include=FALSE}
@@ -19,11 +22,13 @@ library(GGally)
 library(ggplot2)
 ```
 
-# Introduction
+# Introduction {#sec:intr}
 
 The entertainment industry happens to be a competitive market and the film industry is a subset of it. The stakeholders in the film industry are interested in features that make their films successful. One key aspect of a film's success is its rating on platforms such as IMDB, which can influence audience perception and drive revenue.
 
-The aim of this project is to investigate the relationship between the properties of films and their IMDB ratings. Specifically, we want to use a logistic regression model to know which properties of a firm influence whether a film is rated by IMDB as greater than 7 or not, using variables such as year of release, length, budget, number of votes, and genre.
+The aim of this project is to investigate the relationship between the properties of films and their IMDB ratings. Specifically, we want to use a logistic regression model to know which properties of a film influence whether a film is rated by IMDB as greater than 7 or not, using variables such as year of release, length, budget, number of votes, and genre.
+
+Section \ref{sec:expl} speaks to the exploratory data analysis of IMDP ratings and explores the relationship between the rating and the properties of the films. Section \ref{sec:form} contains the results from the logistic regression model. While Section \ref{sec:conc} gives the final remark to the research.
 
 ```{r expl1, echo=FALSE}
 # Importing the data set
@@ -32,6 +37,7 @@ group_08 <- read.csv("C:/Users/mbashiru/OneDrive - AIICO INSURANCE/Desktop/MSc. 
 # Creating an additional column that indicate yes or no if rating is greater than 7
 imdb_group_08 <- group_08 %>%
   mutate(Rating_above_7 = ifelse(rating > 7,"Yes","No"))
+#write.csv(imdb_group_08, "imdb_group_08.csv")
 ```
 
 ```{r expl2, echo=FALSE, include=FALSE}
@@ -39,24 +45,45 @@ imdb_group_08 <- group_08 %>%
 str(imdb_group_08)
 ```
 
-# Exploratory Data Analysis
+# Exploratory Data Analysis {#sec:expl}
 
-You can also embed plots, for example:
+The data contains `r nrow(group_08)` observations and 7 variables. The variables year, length, budget, votes and rating are numerical variables, and genre is a categorical variable. Table \ref{tab:sums} shows the first 6 rows of the table. It is also worthy of note that the length of some of the films are not recorded.
 
 ```{r expl3, echo=FALSE}
-# Displaying the summary statistics of the numerical variables
-summary(imdb_group_08[c("year", "length", "budget", "votes", "rating")])
+kable(head(group_08), caption = '\\label{tab:sums} Highlight of the IMDB data',booktabs = TRUE)%>%
+     kable_styling(font_size = 3, latex_options = c("scale_down", "hold_position"))
 ```
 
+From the summary statistics in table \ref{tab:sums}, we can see that the year of release of the films are between `r min(imdb_group_08$year)` to `r max(imdb_group_08$year)`. The minimum budget for film in the data set is `r min(imdb_group_08$budget)` million while the maximum `r max(imdb_group_08$budget)` million.
 
-```{r scatp, echo=FALSE, warning=FALSE}
+```{r expl4, echo=FALSE}
+# Displaying the summary statistics of the numerical variables
+#summary(imdb_group_08[c("year", "length", "budget", "votes", "rating")])
+kable(summary(imdb_group_08[c("year", "length", "budget", "votes", "rating")]), caption = '\\label{tab:sums} Summary statistics of the numerical variables',booktabs = TRUE)%>%
+     kable_styling(font_size = 7, latex_options = c("scale_down", "hold_position"))
+```
+
+from the scatterplot in figure \ref{fig:scatp}, we can see that there is a negative correlation between the length of the film and its rating. This implies that films with longer length tends to be rated low. There is a positive correlation between the budget of films production and it rating, however, the correlation is weak.
+
+```{r scatp, echo=FALSE, warning=FALSE, out.width='80%', fig.align = "center", fig.cap = "\\label{fig:scatp} Scatterplot matrix of the numerical variables .", fig.pos = "H"}
 # Create a scatterplot matrix of the numerical variables
 ggpairs(imdb_group_08[c("year", "length", "budget", "votes", "rating")])
 ```
 
-```{r boxp, echo=FALSE}
+From figure \ref{fig:boxp1}, we can see that some genres tend to have higher ratings than others. For example, comedy tend to have higher ratings than romance films. While majority of the short films are rated higher than 7.
+
+```{r boxp, echo=FALSE, out.width='80%', fig.align = "center", fig.cap = "\\label{fig:boxp1} Boxplot of rating by genre.", fig.pos = "H"}
 # Creating a box plot of the IMDB ratings by genre
 ggplot(imdb_group_08, aes(x = genre, y = rating)) + 
-  geom_boxplot()
+  geom_boxplot(fill = "skyblue")
 ```
 
+# Formal Data Analysis {#sec:form}
+
+
+
+```{r}
+
+```
+
+# Conclusion {#sec:conc}
