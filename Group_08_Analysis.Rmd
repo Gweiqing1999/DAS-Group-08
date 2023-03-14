@@ -2,7 +2,7 @@
 title: "The Impact of firm's features on IMDB Ratings"
 author: "Yujie Tang, Jialu FU, Weiqing GUO, Bashiru Mukaila, Wanding Wang"
 date: "2023-03-14"
-output: pdf_document
+output: github_document
 ---
 
 ```{r setup, include=FALSE}
