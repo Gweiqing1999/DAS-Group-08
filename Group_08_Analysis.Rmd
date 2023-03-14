@@ -1,5 +1,5 @@
 ---
-title: "The Impact of firm's features on IMDB Ratings"
+title: "The Impact of film's features on IMDB Ratings: A logistic Regression approach"
 author: "Yujie Tang, Jialu FU, Weiqing GUO, Bashiru Mukaila, Wanding Wang"
 date: "2023-03-14"
 output: github_document
@@ -49,7 +49,7 @@ summary(imdb_group_08[c("year", "length", "budget", "votes", "rating")])
 ```
 
 
-```{r scatp, echo=FALSE}
+```{r scatp, echo=FALSE, warning=FALSE}
 # Create a scatterplot matrix of the numerical variables
 ggpairs(imdb_group_08[c("year", "length", "budget", "votes", "rating")])
 ```
