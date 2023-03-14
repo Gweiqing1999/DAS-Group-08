@@ -1,0 +1,62 @@
+---
+title: "The Impact of firm's features on IMDB Ratings"
+author: "Yujie Tang, Jialu FU, Weiqing GUO, Bashiru Mukaila, Wanding Wang"
+date: "2023-03-14"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readxl)
+library(MASS)
+library(tidyverse)
+library(kableExtra)
+library(broom)
+library(sjPlot)
+library(stats)
+library(jtools)
+library(GGally)
+library(ggplot2)
+```
+
+# Introduction
+
+The entertainment industry happens to be a competitive market and the film industry is a subset of it. The stakeholders in the film industry are interested in features that make their films successful. One key aspect of a film's success is its rating on platforms such as IMDB, which can influence audience perception and drive revenue.
+
+The aim of this project is to investigate the relationship between the properties of films and their IMDB ratings. Specifically, we want to use a logistic regression model to know which properties of a firm influence whether a film is rated by IMDB as greater than 7 or not, using variables such as year of release, length, budget, number of votes, and genre.
+
+```{r expl1, echo=FALSE}
+# Importing the data set
+group_08 <- read.csv("C:/Users/mbashiru/OneDrive - AIICO INSURANCE/Desktop/MSc. Data Analytics/Second Semester/STATS5085 - Data Analysis Skills (M)/Assessment/4. Group Project 2/dataset8.csv")
+
+# Creating an additional column that indicate yes or no if rating is greater than 7
+imdb_group_08 <- group_08 %>%
+  mutate(Rating_above_7 = ifelse(rating > 7,"Yes","No"))
+```
+
+```{r expl2, echo=FALSE, include=FALSE}
+# Displaying the structure of the data set
+str(imdb_group_08)
+```
+
+# Exploratory Data Analysis
+
+You can also embed plots, for example:
+
+```{r expl3, echo=FALSE}
+# Displaying the summary statistics of the numerical variables
+summary(imdb_group_08[c("year", "length", "budget", "votes", "rating")])
+```
+
+
+```{r scatp, echo=FALSE}
+# Create a scatterplot matrix of the numerical variables
+ggpairs(imdb_group_08[c("year", "length", "budget", "votes", "rating")])
+```
+
+```{r boxp, echo=FALSE}
+# Creating a box plot of the IMDB ratings by genre
+ggplot(imdb_group_08, aes(x = genre, y = rating)) + 
+  geom_boxplot()
+```
+
