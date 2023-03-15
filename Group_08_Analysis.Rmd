@@ -32,7 +32,7 @@ Section \ref{sec:expl} speaks to the exploratory data analysis of IMDP ratings a
 
 ```{r expl1, echo=FALSE}
 # Importing the data set
-group_08 <- read.csv("C:/Users/mbashiru/OneDrive - AIICO INSURANCE/Desktop/MSc. Data Analytics/Second Semester/STATS5085 - Data Analysis Skills (M)/Assessment/4. Group Project 2/dataset8.csv")
+group_08 <- read.csv("dataset8.csv")
 
 # Creating an additional column that indicate yes or no if rating is greater than 7
 imdb_group_08 <- group_08 %>%
@@ -47,14 +47,14 @@ str(imdb_group_08)
 
 # Exploratory Data Analysis {#sec:expl}
 
-The data contains `r nrow(group_08)` observations and 7 variables. The variables year, length, budget, votes and rating are numerical variables, and genre is a categorical variable. Table \ref{tab:sums} shows the first 6 rows of the table. It is also worthy of note that the length of some of the films are not recorded.
+The data contains `r nrow(group_08)` observations and 7 variables. The variables year, length, budget, votes, and rating are numerical variables, and genre is a categorical variable. Table \ref{tab:head} shows the first 6 rows of the table. It is also worth of note that the length of some of the films is not recorded.
 
 ```{r expl3, echo=FALSE}
-kable(head(group_08), caption = '\\label{tab:sums} Highlight of the IMDB data',booktabs = TRUE)%>%
+kable(head(group_08), caption = '\\label{tab:head} Highlight of the IMDB data',booktabs = TRUE)%>%
      kable_styling(font_size = 3, latex_options = c("scale_down", "hold_position"))
 ```
 
-From the summary statistics in table \ref{tab:sums}, we can see that the year of release of the films are between `r min(imdb_group_08$year)` to `r max(imdb_group_08$year)`. The minimum budget for film in the data set is `r min(imdb_group_08$budget)` million while the maximum `r max(imdb_group_08$budget)` million.
+From the summary statistics in table \ref{tab:sums}, we can see that the year of release of the films is between `r min(imdb_group_08$year)` to `r max(imdb_group_08$year)`. The minimum budget for film in the data set is `r min(imdb_group_08$budget)` million while the maximum is `r max(imdb_group_08$budget)` million.
 
 ```{r expl4, echo=FALSE}
 # Displaying the summary statistics of the numerical variables
@@ -63,14 +63,14 @@ kable(summary(imdb_group_08[c("year", "length", "budget", "votes", "rating")]), 
      kable_styling(font_size = 7, latex_options = c("scale_down", "hold_position"))
 ```
 
-from the scatterplot in figure \ref{fig:scatp}, we can see that there is a negative correlation between the length of the film and its rating. This implies that films with longer length tends to be rated low. There is a positive correlation between the budget of films production and it rating, however, the correlation is weak.
+From the scatterplot in figure \ref{fig:scatp}, we can see that there is a negative correlation between the length of the film and its rating. This implies that films with longer length tend to be rated low. There is a positive correlation between the budget of film production and its rating, however, the correlation is weak.
 
-```{r scatp, echo=FALSE, warning=FALSE, out.width='80%', fig.align = "center", fig.cap = "\\label{fig:scatp} Scatterplot matrix of the numerical variables .", fig.pos = "H"}
+```{r scatp, echo=FALSE, warning=FALSE, out.width='80%', fig.align = "center", fig.cap = "\\label{fig:scatp} Scatterplot matrix of the numerical variables.", fig.pos = "H"}
 # Create a scatterplot matrix of the numerical variables
 ggpairs(imdb_group_08[c("year", "length", "budget", "votes", "rating")])
 ```
 
-From figure \ref{fig:boxp1}, we can see that some genres tend to have higher ratings than others. For example, comedy tend to have higher ratings than romance films. While majority of the short films are rated higher than 7.
+From figure \ref{fig:boxp1}, we can see that some genres tend to have higher ratings than others. For example, comedy tends to have higher ratings than romance films. While the majority of the short films are rated higher than 7.
 
 ```{r boxp, echo=FALSE, out.width='80%', fig.align = "center", fig.cap = "\\label{fig:boxp1} Boxplot of rating by genre.", fig.pos = "H"}
 # Creating a box plot of the IMDB ratings by genre

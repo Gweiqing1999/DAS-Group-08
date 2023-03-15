@@ -1,0 +1,203 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{5}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{colortbl}
+\usepackage{pdflscape}
+\usepackage{tabu}
+\usepackage{threeparttable}
+\usepackage{threeparttablex}
+\usepackage[normalem]{ulem}
+\usepackage{makecell}
+\usepackage{xcolor}
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same} % disable monospaced font for URLs
+\hypersetup{
+  pdftitle={The Impact of film's features on IMDB Ratings: A logistic Regression approach},
+  pdfauthor={Yujie Tang, Jialu FU, Weiqing GUO, Bashiru Mukaila, Wanding Wang},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{The Impact of film's features on IMDB Ratings: A logistic
+Regression approach}
+\author{Yujie Tang, Jialu FU, Weiqing GUO, Bashiru Mukaila, Wanding
+Wang}
+\date{2023-03-14}
+
+\begin{document}
+\maketitle
+
+\hypertarget{sec:intr}{%
+\section{Introduction}\label{sec:intr}}
+
+The entertainment industry happens to be a competitive market and the
+film industry is a subset of it. The stakeholders in the film industry
+are interested in features that make their films successful. One key
+aspect of a film's success is its rating on platforms such as IMDB,
+which can influence audience perception and drive revenue.
+
+The aim of this project is to investigate the relationship between the
+properties of films and their IMDB ratings. Specifically, we want to use
+a logistic regression model to know which properties of a film influence
+whether a film is rated by IMDB as greater than 7 or not, using
+variables such as year of release, length, budget, number of votes, and
+genre.
+
+Section \ref{sec:expl} speaks to the exploratory data analysis of IMDP
+ratings and explores the relationship between the rating and the
+properties of the films. Section \ref{sec:form} contains the results
+from the logistic regression model. While Section \ref{sec:conc} gives
+the final remark to the research.
+
+\hypertarget{sec:expl}{%
+\section{Exploratory Data Analysis}\label{sec:expl}}
+
+The data contains 2847 observations and 7 variables. The variables year,
+length, budget, votes, and rating are numerical variables, and genre is
+a categorical variable. Table \ref{tab:head} shows the first 6 rows of
+the table. It is also worth of note that the length of some of the films
+is not recorded.
+
+\begin{table}[!h]
+
+\caption{\label{tab:expl3}\label{tab:head} Highlight of the IMDB data}
+\centering
+\resizebox{\linewidth}{!}{
+\fontsize{3}{5}\selectfont
+\begin{tabular}[t]{rrrrrlr}
+\toprule
+film\_id & year & length & budget & votes & genre & rating\\
+\midrule
+5993 & 1943 & 65 & 15.5 & 42 & Action & 7.6\\
+37190 & 1961 & 87 & 12.3 & 6 & Drama & 6.0\\
+43646 & 1987 & 79 & 16.4 & 161 & Action & 7.5\\
+28476 & 1976 & NA & 12.2 & 5 & Documentary & 8.0\\
+23975 & 1982 & 88 & 12.5 & 97 & Action & 3.5\\
+\addlinespace
+50170 & 1936 & NA & 7.0 & 146 & Drama & 4.4\\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+From the summary statistics in table \ref{tab:sums}, we can see that the
+year of release of the films is between 1898 to 2005. The minimum budget
+for film in the data set is 2.5 million while the maximum is 22.3
+million.
+
+\begin{table}[!h]
+
+\caption{\label{tab:expl4}\label{tab:sums} Summary statistics of the numerical variables}
+\centering
+\resizebox{\linewidth}{!}{
+\fontsize{7}{9}\selectfont
+\begin{tabular}[t]{llllll}
+\toprule
+  &      year &     length &     budget &     votes &     rating\\
+\midrule
+ & Min.   :1898 & Min.   :  1.00 & Min.   : 2.50 & Min.   :     5 & Min.   :0.800\\
+ & 1st Qu.:1957 & 1st Qu.: 73.00 & 1st Qu.: 9.90 & 1st Qu.:    11 & 1st Qu.:3.700\\
+ & Median :1982 & Median : 90.00 & Median :11.90 & Median :    29 & Median :4.600\\
+ & Mean   :1976 & Mean   : 82.22 & Mean   :11.85 & Mean   :   657 & Mean   :5.342\\
+ & 3rd Qu.:1997 & 3rd Qu.:101.00 & 3rd Qu.:13.70 & 3rd Qu.:   114 & 3rd Qu.:7.700\\
+\addlinespace
+ & Max.   :2005 & Max.   :480.00 & Max.   :22.30 & Max.   :149494 & Max.   :9.200\\
+ & NA & NA's   :131 & NA & NA & NA\\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+From the scatterplot in figure \ref{fig:scatp}, we can see that there is
+a negative correlation between the length of the film and its rating.
+This implies that films with longer length tend to be rated low. There
+is a positive correlation between the budget of film production and its
+rating, however, the correlation is weak.
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.8\linewidth]{Group_08_Analysis_files/figure-latex/scatp-1} 
+
+}
+
+\caption{\label{fig:scatp} Scatterplot matrix of the numerical variables.}\label{fig:scatp}
+\end{figure}
+
+From figure \ref{fig:boxp1}, we can see that some genres tend to have
+higher ratings than others. For example, comedy tends to have higher
+ratings than romance films. While the majority of the short films are
+rated higher than 7.
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.8\linewidth]{Group_08_Analysis_files/figure-latex/boxp-1} 
+
+}
+
+\caption{\label{fig:boxp1} Boxplot of rating by genre.}\label{fig:boxp}
+\end{figure}
+
+\hypertarget{sec:form}{%
+\section{Formal Data Analysis}\label{sec:form}}
+
+\hypertarget{sec:conc}{%
+\section{Conclusion}\label{sec:conc}}
+
+\end{document}
