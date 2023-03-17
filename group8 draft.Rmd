@@ -1,0 +1,77 @@
+---
+title: "group8"
+output: pdf_document
+date: "2023-03-17"
+---
+##install.packages
+@@#
+
+```{r}
+library(tidyverse)
+library(moderndive)
+library(gapminder)
+library(sjPlot)
+library(stats)
+library(jtools)
+library(visdat)
+library(gridExtra)
+library(tinytex)
+```
+
+## Summary
+
+
+
+```{r}
+dataset8 <- read_csv("C:/Users/kyren/OneDrive/桌面/dataset8.csv")
+summary(dataset8)
+```
+## Missing data
+```{r dataset8}
+vis_miss(dataset8)
+```
+## Plots
+
+IMDB movie Characteristics
+
+```{r echo=TRUE}
+p1 <- ggplot(data=dataset8, aes(x=genre)) + 
+       geom_bar(fill="lightblue") + 
+       xlab("Genre") +
+       ylab("Movies") +
+       theme(axis.text.x=element_text(angle=90, hjust=1, vjust=0))
+p2 <- ggplot(data=dataset8, aes(x=year)) + 
+       geom_bar(fill="lightblue") + 
+       xlab("Year") +
+       ylab("Movies") +
+       theme(axis.text.x=element_text(angle=90, hjust=1, vjust=0))
+p3<- ggplot(data=dataset8, aes(x=length)) + 
+  geom_bar(fill="lightblue") + 
+  xlab("Length") +
+  ylab("Movies") +
+  theme(axis.text.x=element_text(angle=90, hjust=1, vjust=0))
+p4 <- ggplot(data=dataset8, aes(x=rating)) + 
+  geom_histogram(binwidth=5, fill="lightblue") +
+  geom_vline(xintercept=mean(dataset8$rating), colour='red', linetype='longdash') +
+  geom_text(label='Mean', x=55, y=60, hjust='center', size=3) +
+  xlab("Rating")
+p5 <- ggplot(data=dataset8, aes(x=budget)) + 
+  geom_histogram(binwidth=10, fill="lightblue") +
+  xlab("Budget")
+p6 <- ggplot(data=dataset8, aes(x=votes)) + 
+  geom_histogram(binwidth=10, fill="lightblue") +
+  xlab("Votes")
+grid.arrange(p2, p3, p1, p4, p5, p6, nrow=4,
+             top="Movie Characteristics")
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+##Modeling 
+predictor included, by rating variable, using generalized liner model
+fit model
+if binomial, 0<y<1, the variabale rating not in.
+```{r model}
+model<-glm(rating~year+length+budget+votes,data=dataset8)
+summary(model)
+```
