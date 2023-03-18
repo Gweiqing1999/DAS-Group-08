@@ -1,5 +1,5 @@
 ---
-title: "The Impact of film's features on IMDB Ratings: A logistic Regression approach"
+title: "The Impact of Film's Properties on IMDB Ratings: A logistic Regression Approach"
 author: "Yujie Tang, Jialu FU, Weiqing GUO, Bashiru Mukaila, Wanding Wang"
 date: "2023-03-14"
 output: 
@@ -20,11 +20,14 @@ library(stats)
 library(jtools)
 library(GGally)
 library(ggplot2)
+library(visdat)
+library(gridExtra)
+library(tinytex)
 ```
 
 # Introduction {#sec:intr}
 
-The entertainment industry happens to be a competitive market and the film industry is a subset of it. The stakeholders in the film industry are interested in features that make their films successful. One key aspect of a film's success is its rating on platforms such as IMDB, which can influence audience perception and drive revenue.
+The entertainment industry happens to be a competitive market and the film industry is an important aspect of it. The stakeholders in the film industry are interested in properties or features that make their films successful. One key aspect of a film's success is its rating on platforms such as IMDB, which can influence audience perception and drive revenue.
 
 The aim of this project is to investigate the relationship between the properties of films and their IMDB ratings. Specifically, we want to use a logistic regression model to know which properties of a film influence whether a film is rated by IMDB as greater than 7 or not, using variables such as year of release, length, budget, number of votes, and genre.
 
@@ -37,7 +40,7 @@ group_08 <- read.csv("dataset8.csv")
 # Creating an additional column that indicate yes or no if rating is greater than 7
 imdb_group_08 <- group_08 %>%
   mutate(Rating_above_7 = ifelse(rating > 7,"Yes","No"))
-#write.csv(imdb_group_08, "imdb_group_08.csv")
+#write.csv(imdb_group_08, "dataset08.csv")
 ```
 
 ```{r expl2, echo=FALSE, include=FALSE}
@@ -47,14 +50,14 @@ str(imdb_group_08)
 
 # Exploratory Data Analysis {#sec:expl}
 
-The data contains `r nrow(group_08)` observations and 7 variables. The variables year, length, budget, votes, and rating are numerical variables, and genre is a categorical variable. Table \ref{tab:head} shows the first 6 rows of the table. It is also worth of note that the length of some of the films is not recorded.
+The data contains `r nrow(group_08)` observations and `r ncol(group_08)` variables. The variables year, length, budget, votes, and rating are numerical variables, and genre is a categorical variable. Table \ref{tab:head} shows the first 6 rows of the table. It is also worth of note that the length of some of the films is not recorded.
 
 ```{r expl3, echo=FALSE}
 kable(head(group_08), caption = '\\label{tab:head} Highlight of the IMDB data',booktabs = TRUE)%>%
      kable_styling(font_size = 3, latex_options = c("scale_down", "hold_position"))
 ```
 
-From the summary statistics in table \ref{tab:sums}, we can see that the year of release of the films is between `r min(imdb_group_08$year)` to `r max(imdb_group_08$year)`. The minimum budget for film in the data set is `r min(imdb_group_08$budget)` million while the maximum is `r max(imdb_group_08$budget)` million.
+From the summary statistics in table \ref{tab:sums} and figure \ref{fig:chart}, we can see that the year of release of the films is between `r min(imdb_group_08$year)` to `r max(imdb_group_08$year)` and the year with the highest release of films rated is `r names(table(imdb_group_08$year))[which.max(table(imdb_group_08$year))]`. The minimum budget for film in the data set is `r min(imdb_group_08$budget)` million while the maximum is `r max(imdb_group_08$budget)` million. It is also clear that Action films is the highest genre in terms of frequency.
 
 ```{r expl4, echo=FALSE}
 # Displaying the summary statistics of the numerical variables
@@ -62,6 +65,41 @@ From the summary statistics in table \ref{tab:sums}, we can see that the year of
 kable(summary(imdb_group_08[c("year", "length", "budget", "votes", "rating")]), caption = '\\label{tab:sums} Summary statistics of the numerical variables',booktabs = TRUE)%>%
      kable_styling(font_size = 7, latex_options = c("scale_down", "hold_position"))
 ```
+
+
+```{r chart, echo=FALSE, warning=FALSE, out.width='100%', fig.align = "center", fig.cap = "\\label{fig:chart} Distribution of Film's Properties.", fig.pos = "H"}
+p1 <- ggplot(data=imdb_group_08, aes(x=genre)) + 
+       geom_bar(fill="lightblue") + 
+       xlab("Genre") +
+       ylab("Films") +
+       theme(axis.text.x=element_text(angle=100, hjust=1, vjust=0))
+p2 <- ggplot(data=imdb_group_08, aes(x=year)) + 
+       geom_bar(fill="lightblue") + 
+       xlab("Year") +
+       ylab("Films") +
+       theme(axis.text.x=element_text(angle=100, hjust=1, vjust=0))
+p3<- ggplot(data=imdb_group_08, aes(x=length)) + 
+  geom_bar(fill="lightblue") + 
+  xlab("Length") +
+  ylab("Films") +
+  theme(axis.text.x=element_text(angle=100, hjust=1, vjust=0))
+p4 <- ggplot(data=imdb_group_08, aes(x=rating)) + 
+  geom_histogram(fill="lightblue") +
+  geom_vline(xintercept=mean(imdb_group_08$rating), colour='red', linetype='longdash') +
+  geom_text(label='Mean', x=55, y=60, hjust='center', size=3) +
+  xlab("Rating") +
+  ylab("Films")
+p5 <- ggplot(data=imdb_group_08, aes(x=budget)) + 
+  geom_histogram(binwidth = 2,fill="lightblue") +
+  xlab("Budget") +
+  ylab("Films")
+p6 <- ggplot(data=imdb_group_08, aes(x=votes)) + 
+  geom_histogram(binwidth = 2, fill="lightblue") +
+  xlab("Votes") +
+  ylab("Films")
+grid.arrange(p2, p3, p4, p5, p6, p1, ncol=2)
+```
+
 
 From the scatterplot in figure \ref{fig:scatp}, we can see that there is a negative correlation between the length of the film and its rating. This implies that films with longer length tend to be rated low. There is a positive correlation between the budget of film production and its rating, however, the correlation is weak.
 
@@ -75,8 +113,48 @@ From figure \ref{fig:boxp1}, we can see that some genres tend to have higher rat
 ```{r boxp, echo=FALSE, out.width='80%', fig.align = "center", fig.cap = "\\label{fig:boxp1} Boxplot of rating by genre.", fig.pos = "H"}
 # Creating a box plot of the IMDB ratings by genre
 ggplot(imdb_group_08, aes(x = genre, y = rating)) + 
-  geom_boxplot(fill = "skyblue")
+  geom_boxplot(fill = "steelblue")
 ```
+
+From figure \ref{fig:bboxp}, the binary Boxplot of year by rating shows that the middle 50% of the ratings are between 1953 and 1999 for the ratings greater than 7 while it is between 1959 and 1996 for the ratings that are 7 and below. It is also evident that there is more variability in the length of ratings that are greater than 7 compared to the ratings that are 7 and below as depicted by the Binary Boxplot of length by rating. We can also see that the budget for ratings greater 7 seems to be higher that ratings of 7 and below.
+
+```{r Bboxp, echo=FALSE, warning=FALSE, out.width='70%', fig.align = "center", fig.cap = "\\label{fig:bboxp} Binary Boxplot for years, Lenght and Budget.", fig.pos = "H"}
+# Convert chr to factor
+imdb_group_08$Rating_above_7 <- as.factor(imdb_group_08$Rating_above_7)
+imdb_group_08$genre <- as.factor(imdb_group_08$genre)
+
+p7 <- ggplot(data = imdb_group_08, mapping = aes(x = Rating_above_7, y = year)) +
+  geom_boxplot(fill = "steelblue") +
+  labs(x = "If rating is greater than 7", y = "year",
+       title = "Binary Boxplot of Year by Rating")  +
+  theme(plot.title = element_text(size=7))
+p8 <- ggplot(data = imdb_group_08, mapping = aes(x = Rating_above_7, y = length)) +
+  geom_boxplot(fill = "steelblue") +
+  labs(x = "If rating is greater than 7", y = "length",
+       title = "Binary Boxplot of Length by Rating")  +
+  theme(plot.title = element_text(size=7))
+p9 <- ggplot(data = imdb_group_08, mapping = aes(x = Rating_above_7, y = budget)) +
+  geom_boxplot(fill = "steelblue") +
+  labs(x = "If rating is greater than 7", y = "budget",
+       title = "Binary Boxplot of Budget by Rating")  +
+  theme(plot.title = element_text(size=7))
+grid.arrange(p7, p8, p9, ncol=3)
+
+```
+
+From figure \ref{fig:col}, we can see that almost all short films are rated above 7 and there is no romance film that has a rating greater than 7. It is also very evident that comedy has the highest number of rating that is greater than 7.
+
+```{r col, echo=FALSE, warning=FALSE, out.width='70%', fig.align = "center", fig.cap = "\\label{fig:col} Genres of IMDB Rated Films and their rating status.", fig.pos = "H"}
+IMDP_Barchat <- table(imdb_group_08$genre, imdb_group_08$Rating_above_7)
+IMDP_Barchat <- as.data.frame(IMDP_Barchat)
+colnames(IMDP_Barchat) <- c("Genre", "Rating", "number")
+
+ggplot(data = IMDP_Barchat, aes(x = Genre, y = number, fill = Rating)) + 
+  geom_col() + 
+  facet_wrap(~ Rating, ncol = 1) +
+  labs(x = "Genre", y = "Number of Film")
+```
+
 
 # Formal Data Analysis {#sec:form}
 
