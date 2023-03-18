@@ -82,17 +82,17 @@ imdb_group_08$genre <- as.factor(imdb_group_08$genre)
 p7 <- ggplot(data = imdb_group_08, mapping = aes(x = Rating_above_7, y = year)) +
   geom_boxplot(fill = "steelblue") +
   labs(x = "if rating is greater than 7", y = "year",
-       title = "Binary Boxplot of Year by Rating Type")  +
+       title = "Binary Boxplot of Year by Rating")  +
   theme(plot.title = element_text(size=7))
 p8 <- ggplot(data = imdb_group_08, mapping = aes(x = Rating_above_7, y = length)) +
   geom_boxplot(fill = "steelblue") +
   labs(x = "if rating is greater than 7", y = "length",
-       title = "Binary Boxplot of Length by Rating Type")  +
+       title = "Binary Boxplot of Length by Rating")  +
   theme(plot.title = element_text(size=7))
 p9 <- ggplot(data = imdb_group_08, mapping = aes(x = Rating_above_7, y = budget)) +
   geom_boxplot(fill = "steelblue") +
   labs(x = "if rating is greater than 7", y = "budget",
-       title = "Binary Boxplot of Budget by Rating Type")  +
+       title = "Binary Boxplot of Budget by Rating")  +
   theme(plot.title = element_text(size=7))
 grid.arrange(p7, p8, p9, ncol=3)
 ```
