@@ -1,0 +1,377 @@
+---
+title: "The Impact of Film's Properties on IMDB Ratings: A logistic Regression Approach"
+author: "Yujie Tang, Jialu FU, Weiqing GUO, Bashiru Mukaila, Wanding Wang"
+date: "2023-03-14"
+output: 
+  pdf_document:
+          number_sections: yes
+          latex_engine: xelatex
+fig_caption: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readxl)
+library(MASS)
+library(tidyverse)
+library(kableExtra)
+library(broom)
+library(sjPlot)
+library(stats)
+library(jtools)
+library(GGally)
+library(ggplot2)
+library(visdat)
+library(gridExtra)
+library(tinytex)
+```
+
+# Introduction {#sec:intr}
+
+The entertainment industry happens to be a competitive market and the film industry is an important aspect of it. The stakeholders in the film industry are interested in properties or features that make their films successful. One key aspect of a film's success is its rating on platforms such as IMDB, which can influence audience perception and drive revenue.
+
+The aim of this project is to investigate the relationship between the properties of films and their IMDB ratings. Specifically, we want to use a logistic regression model to know which properties of a film influence whether a film is rated by IMDB as greater than 7 or not, using variables such as year of release, length, budget, number of votes, and genre.
+
+Section \ref{sec:expl} speaks to the exploratory data analysis of IMDP ratings and explores the relationship between the rating and the properties of the films. Section \ref{sec:form} contains the results from the logistic regression model. While Section \ref{sec:conc} gives the final remark to the research.
+
+```{r expl1, echo=FALSE}
+# Importing the data set
+group_08 <- read.csv("dataset8.csv")
+
+# Creating an additional column that indicate yes or no if rating is greater than 7
+imdb_group_08 <- group_08 %>%
+  mutate(Rating_above_7 = ifelse(rating > 7,"Yes","No"))
+```
+
+```{r expl2, echo=FALSE, include=FALSE}
+# Displaying the structure of the data set
+str(imdb_group_08)
+```
+
+# Exploratory Data Analysis {#sec:expl}
+
+The data contains `r nrow(group_08)` observations and `r ncol(group_08)` variables. The variables year, length, budget, votes, and rating are numerical variables, and genre is a categorical variable. Table \ref{tab:head} shows the first 6 rows of the table. It is also worth of note that the length of some of the films is not recorded.
+
+```{r expl3, echo=FALSE}
+kable(head(group_08), caption = '\\label{tab:head} Highlight of the IMDB data',booktabs = TRUE)%>%
+     kable_styling(font_size = 3, latex_options = c("scale_down", "hold_position"))
+```
+
+From the summary statistics in table \ref{tab:sums}, we can see that the year of release of the films is between `r min(imdb_group_08$year)` to `r max(imdb_group_08$year)` and the year with the highest release of films rated is `r names(table(imdb_group_08$year))[which.max(table(imdb_group_08$year))]`. The minimum budget for film in the data set is `r min(imdb_group_08$budget)` million while the maximum is `r max(imdb_group_08$budget)` million. It is also clear that Action films is the highest genre in terms of frequency.
+
+```{r expl4, echo=FALSE}
+# Displaying the summary statistics of the numerical variables
+#summary(imdb_group_08[c("year", "length", "budget", "votes", "rating")])
+kable(summary(imdb_group_08[c("year", "length", "budget", "votes", "rating")]), caption = '\\label{tab:sums} Summary statistics of the numerical variables',booktabs = TRUE)%>%
+     kable_styling(font_size = 7, latex_options = c("scale_down", "hold_position"))
+```
+
+From the scatterplot in figure \ref{fig:scatp}, we can see that there is a negative correlation between the length of the film and its rating. This implies that films with longer length tend to be rated low. There is a positive correlation between the budget of film production and its rating, however, the correlation is weak.
+
+```{r scatp, echo=FALSE, warning=FALSE, out.width='70%', fig.align = "center", fig.cap = "\\label{fig:scatp} Scatterplot matrix of the numerical variables.", fig.pos = "H"}
+# Create a scatterplot matrix of the numerical variables
+ggpairs(imdb_group_08[c("year", "length", "budget", "votes", "rating")])
+```
+
+From figure \ref{fig:boxp1}, we can see that some genres tend to have higher ratings than others. For example, comedy tends to have higher ratings than romance films. While the majority of the short films are rated higher than 7.
+
+```{r boxp, echo=FALSE, out.width='70%', fig.align = "center", fig.cap = "\\label{fig:boxp1} Boxplot of rating by genre.", fig.pos = "H"}
+# Creating a box plot of the IMDB ratings by genre
+ggplot(imdb_group_08, aes(x = genre, y = rating)) + 
+  geom_boxplot(fill = "steelblue")
+```
+
+From figure \ref{fig:bboxp}, the binary Boxplot of year by rating shows that the middle 50% of the ratings are between 1953 and 1999 for the ratings greater than 7 while it is between 1959 and 1996 for the ratings that are 7 and below. It is also evident that there is more variability in the length of ratings that are greater than 7 compared to the ratings that are 7 and below as depicted by the Binary Boxplot of length by rating. We can also see that the budget for ratings greater 7 seems to be higher that ratings of 7 and below.
+
+```{r Bboxp, echo=FALSE, warning=FALSE, out.width='70%', fig.align = "center", fig.cap = "\\label{fig:bboxp} Binary Boxplot for years, Lenght and Budget.", fig.pos = "H"}
+# Convert chr to factor
+imdb_group_08$Rating_above_7 <- as.factor(imdb_group_08$Rating_above_7)
+imdb_group_08$genre <- as.factor(imdb_group_08$genre)
+
+p7 <- ggplot(data = imdb_group_08, mapping = aes(x = Rating_above_7, y = year)) +
+  geom_boxplot(fill = "lightblue") +
+  labs(x = "If rating is greater than 7", y = "year",
+       title = "Binary Boxplot of Year by Rating")  +
+  theme(plot.title = element_text(size=7))
+p8 <- ggplot(data = imdb_group_08, mapping = aes(x = Rating_above_7, y = length)) +
+  geom_boxplot(fill = "lightblue") +
+  labs(x = "If rating is greater than 7", y = "length",
+       title = "Binary Boxplot of Length by Rating")  +
+  theme(plot.title = element_text(size=7))
+p9 <- ggplot(data = imdb_group_08, mapping = aes(x = Rating_above_7, y = budget)) +
+  geom_boxplot(fill = "lightblue") +
+  labs(x = "If rating is greater than 7", y = "budget",
+       title = "Binary Boxplot of Budget by Rating")  +
+  theme(plot.title = element_text(size=7))
+grid.arrange(p7, p8, p9, ncol=3)
+
+```
+
+From figure \ref{fig:col}, we can see that almost all short films are rated above 7 and there is no romance film that has a rating greater than 7. It is also very evident that comedy has the highest number of rating that is greater than 7.
+
+```{r col, echo=FALSE, warning=FALSE, fig.width = 10, fig.align = "center", fig.cap = "\\label{fig:col} Genres of IMDB Rated Films and their rating status.", fig.pos = "H"}
+IMDP_Barchat <- table(imdb_group_08$genre, imdb_group_08$Rating_above_7)
+IMDP_Barchat <- as.data.frame(IMDP_Barchat)
+colnames(IMDP_Barchat) <- c("Genre", "Rating", "number")
+
+ggplot(data = IMDP_Barchat, aes(x = Genre, y = number, fill = Rating)) + 
+  geom_col() + 
+  facet_wrap(~ Rating, ncol = 1) +
+  labs(x = "Genre", y = "Number of Film")
+```
+
+
+# Formal Data Analysis {#sec:form}
+
+## Logistic regression with one categorical explanatory variable
+
+An IMDB rating of over 7 indicates an excellent and highly-regarded film. Consequently, investigating which properties influence movie ratings is an intriguing research question. 
+
+Consider determining whether the categorical variable *genre* has an effect on the movie rating above seven. Display the distribution by creating a barplot of *genre* and *Rating_above_7*:
+
+```{r boxpl, echo=FALSE, warning=FALSE, fig.width = 10, fig.align = "center", fig.cap = "\\label{fig:boxp2} Proportions of Yes/No Ratings by Genre.",fig.pos = "H"}
+# Compute the proportions of ratings
+genre_counts <- as.data.frame(table(imdb_group_08$genre,
+                                    imdb_group_08$Rating_above_7))
+colnames(genre_counts) <- c('genre','Rating_above_7','count')
+
+genre_counts <- genre_counts %>%
+  group_by(genre) %>%
+  mutate(total = sum(count)) %>%
+  ungroup() %>%
+  mutate(proportion = round(count / total, 2))
+
+# Plot the proportions of Yes/No Ratings by Genre
+genre_counts %>%
+  ggplot(aes(genre, proportion, fill = Rating_above_7)) +
+  geom_col(position = "dodge") +
+  labs(title = "", x = "Genre", y = "Proportion") +
+  scale_fill_manual(values = c("#BEAED4", "#A6BDDB"), labels = c("No", "Yes")) +
+  theme(axis.text.x = element_text(size = 7),
+        axis.text.y = element_text(size = 7),
+        legend.title = element_text(size = 9),
+        legend.text = element_text(size = 7),
+        legend.key.size = unit(10, "pt"))
+```
+
+From Figure \ref{fig:boxp2}, we can observe that the proportion of low ratings for Action, Drama, and Romance genres is relatively high, exceeding 80%, while the proportion of high ratings for Documentary and Short genres is higher, exceeding 90%. The genre of Comedy has a relatively balanced proportion of high and low ratings.
+
+### Model specification and estimation
+
+Therefore, we further investigate the impact of movie genres on movie ratings. Here $p_i = Prob(Rating\_above\_7 = Yes)$, with $genre_i$ being the type of the film for $i = 1, 2, ..., 2847$. The model we will consider is of the form:
+
+$$g(p_i) = log(\frac{p_i}{1-p_i}) = \alpha + \beta \cdot genre_i$$
+and we fit it in R as follows:
+```{r, echo=FALSE}
+model.genre <- glm(Rating_above_7 ~ genre,
+                   data = imdb_group_08, 
+                   family = binomial(link = "logit"))
+```
+
+```{r, echo=FALSE}
+model.genre %>%
+  summary()
+```
+
+
+```{r coefs, echo=FALSE, include=FALSE}
+model.genre.coefs <- model.genre %>%
+  summary() %>%
+  coef()
+```
+
+From the output, the estimated coefficients for *Action (Intercept)*, *Drama*, and *Romance* are negative, suggesting that movies of these three genres are more likely to receive ratings below 7, consistent with our previous observation. However, the coefficient for *Romance* is not significant, which may be due to a lack of observations with ratings above 7. All other estimated coefficients are significant at the 5% level of significance.
+
+
+### Model inference and interpretation
+
+The baseline category for our binary response is *No*, and the baseline category for our explanatory variable is *Action*. Hence the estimates from the logistic regression model are on the log-odds scale and apply to movies with a rating above 7:
+
+$$\qquad \quad \; \log(\frac{\hat{p}}{1-\hat{p}}) = `r round(model.genre.coefs["(Intercept)", "Estimate"],2)`  + \beta \cdot \mathrm{II}_{genre}({\cdot})$$
+$$...$$
+where $\beta$ is `r round(model.genre.coefs["genreAnimation", "Estimate"],2)` for Animation, `r round(model.genre.coefs["genreComedy", "Estimate"],2)` for Comedy, `r round(model.genre.coefs["genreDocumentary", "Estimate"],2)` for Documentary, `r round(model.genre.coefs["genreDrama", "Estimate"],2)` for Drama, `r round(model.genre.coefs["genreRomance", "Estimate"],2)` for Romance, `r round(model.genre.coefs["genreShort", "Estimate"],2)` for Short films
+
+and $\mathrm{II}_{genre}({\cdot})$ is an indicator function, that takes a specific movie genre (excluding Action genre) as input and returns 1 if the input variable matches the genre, and 0 otherwise.
+
+The point estimate and the corresponding 95% confidence interval for the log-odds of each movie genre can be obtained, as shown in the Figure \ref{fig:modp1}:
+
+```{r, echo=FALSE, warning=FALSE, out.width = "87.5%", fig.width = 10, fig.height = 4, dpi = 150, fig.align = "left", fig.cap = "\\label{fig:modp1} Log-Odds (Rating above 7).", fig.pos = "H"}
+plot_model(model.genre, show.values = TRUE, transform = NULL,
+           title = "Log-Odds (Rating above 7)", show.p = FALSE)
+```
+
+Consider using the estimated coefficients to quantify the effect of genre, the regression coefficients on the odds scale are given by:
+
+```{r, echo=FALSE}
+# Coefficients on the odds scale
+model.genre.coefs.exp <- model.genre %>%
+  coef() %>%
+  exp()
+model.genre.coefs.exp
+```
+
+Similarly, the point estimate and the corresponding 95% confidence interval for the odds scale of each movie genre can be obtained, as shown in the Figure \ref{fig:modp2}:
+
+```{r, echo=FALSE, warning=FALSE, out.width = "87.5%", fig.width = 10, fig.height = 4, dpi = 150, fig.align = "left", fig.cap = "\\label{fig:modp2} Odds (Rating above 7).", fig.pos = "H"}
+plot_model(model.genre, show.values = TRUE, 
+           title = "Odds (Rating above 7)", show.p = FALSE) +
+  theme(axis.text.x = element_text(size = 2))
+```
+
+The *Action (Intercept)* gives us in the Action movie genre, the odd of a high rating is approximately `r round(model.genre.coefs.exp["(Intercept)"],2)` times that of a low rating. And the odds of the rating being above 7 for *Animation* are `r round(model.genre.coefs.exp["genreAnimation"],2)` times greater than the odds if the movies are *Action*. For the movie genres *Documentary* and *Short*, the odds of having a high rating is `r round(model.genre.coefs.exp["genreDocumentary"],2)` and `r round(model.genre.coefs.exp["genreShort"],2)` times higher than that of *Action*, respectively.
+
+Next, we calculate the estimated probability of a rating above 7 for each movie genre using the following formula:
+
+$$\hat{p} = \frac{\exp(\hat{\alpha} + \hat{\beta} \cdot \mathrm{II}_{genre}({\cdot}))}{1+\exp(\hat{\alpha} + \hat{\beta} \cdot \mathrm{II}_{genre}({\cdot}))}$$
+The estimated probabilities of each type of movie reaching a score of 7 or higher were obtained, and the probabilities were compared with the frequencies of the data to produce the following graphs.
+
+```{r, echo=FALSE, warning=FALSE, out.width = "87.5%", fig.width = 10, fig.height = 4, dpi = 150, fig.align = "left", fig.cap = "\\label{fig:modp3} Estimated probability of ranting being above 7 by genre.", fig.pos = "H"}
+plot_model(model.genre, type = "pred", title = "",
+           axis.title = c("Genre", "Prob. of ranting being above 7"))
+```
+
+```{r, echo=FALSE, fig.width = 10, fig.align = "center", fig.cap = "\\label{fig:boxp3} Frequencies and estimated probabilities by Genre.", fig.pos = "H"}
+# Probability
+mod.genre.coef.logodds <- model.genre %>%
+  summary() %>%
+  coef()
+action_prob <- plogis(mod.genre.coef.logodds["(Intercept)", "Estimate"])
+
+# Vector of genre names and probabilities
+genres <- c("Animation", "Comedy", "Documentary", "Drama", "Romance", "Short")
+genre_prob <- c(action_prob)
+
+for (g in genres) {
+  prob <- plogis(mod.genre.coef.logodds["(Intercept)", "Estimate"] +
+                   mod.genre.coef.logodds[paste0("genre", g), "Estimate"])
+  genre_prob <- append(genre_prob, prob)
+}
+
+# Create a data frame with genre and probability columns
+genres <- c("Action", genres)
+genre_prob_df <- data.frame(genre = genres, probability = genre_prob)
+
+genre_freq_df <- genre_counts %>%
+  filter(Rating_above_7 == "Yes")
+
+genre_freq_df <- genre_freq_df[ , -c(2:4)]
+colnames(genre_freq_df)[2] <- "frequency"
+
+genre_prob_df <- genre_prob_df %>%
+  left_join(genre_freq_df, by='genre')
+
+# Plot the frequency and estimated probability by Genre
+genre_prob_df_long <- genre_prob_df %>%
+  pivot_longer(cols = c("frequency","probability"),
+               names_to = "Fitted_vs_True",
+               values_to = "value")
+
+genre_prob_plot <- genre_prob_df_long %>%
+  ggplot(aes(genre, value, fill = Fitted_vs_True)) +
+  geom_col(position = "dodge") +
+  labs(title = "", x = "Genre", y = "Value") +
+  scale_fill_manual(values = c("#A6BDDB", "#8FB87D"), 
+                    labels = c("Frequency", "Probability")) +
+  theme(axis.title.x = element_text(size = 9),
+        axis.text.x = element_text(size = 7),
+        axis.title.y = element_text(size = 9),
+        axis.text.y = element_text(size = 7),
+        legend.title = element_text(size = 9),
+        legend.text = element_text(size = 7),
+        legend.key.size = unit(10, "pt"),
+        plot.title = element_text(size = 12,hjust = 0.5))
+genre_prob_plot
+```
+
+The Figure \ref{fig:boxp3} shows that the estimated probabilities are consistent with the frequencies, indicating that the model has a good fit to the data.
+
+
+
+## Logistic regression with several explanatory variables
+
+### Model selection and estimation
+
+We now consider a generalized linear model that takes into account multiple variables. To identify the factors that influence movie ratings, we will use a stepwise approach and select the best model based on AIC as the selection criterion.
+
+```{r, echo=FALSE}
+# Full model
+predictor_list <- paste(colnames(imdb_group_08[,2:6]),collapse="+")
+f <- paste(c("Rating_above_7 ~ ", predictor_list), collapse="")
+
+full.model <- glm(f, data = imdb_group_08, family = binomial(link = "logit"))
+
+# Stepwise selection
+step.model <- stepAIC(full.model, direction = "both", 
+                      trace = FALSE)
+summary(step.model)
+```
+
+```{r, echo=FALSE, include=FALSE}
+step.model.coef. <- step.model %>%
+  coef()
+round(step.model.coef.["(Intercept)"],2)
+```
+
+
+The best model removed the *votes* variable from the full model, indicating that its impact on the rating was not significant when considering other variables, which resulted in a relatively poor model fit. Additionally, due to 131 missing values in *length*, it was removed from the analysis. The model we obtained is of the form:
+
+$$g(p_i) = log(\frac{p_i}{1-p_i}) = \alpha + \beta_1 \cdot year_i + \beta_2 \cdot length_i + \beta_3 \cdot budget_i + \beta_4 \cdot genre_i$$
+From the output, the estimated coefficients for *length* is negative, suggesting that movies of longer duration are more likely to receive ratings below 7. The estimated coefficients for *year* and *budget* are positive, indicating that as the year of the movie's release becomes more recent and the budget increases, the movie's rating also tends to be higher. All three numerical variables were significant at the 5% level of significance, while the categorical variable *genre* showed that the 'Animation' and 'Romance' genres were not significant.
+
+
+### Model inference and interpretation
+
+The estimates from the logistic regression model are on the log-odds scale and apply to movies with a rating above 7:
+
+$$g(\hat{p_i}) = log(\frac{\hat{p_i}}{1-\hat{p_i}}) = `r round(step.model.coef.["(Intercept)"],2)` + `r round(step.model.coef.["year"],2)` \cdot year_i `r round(step.model.coef.["length"],2)` \cdot length_i + `r round(step.model.coef.["budget"],2)` \cdot budget_i + \hat{\beta_4} \cdot \mathrm{II}_{genre}({\cdot})$$
+
+The point estimate and the corresponding 95% confidence interval for the log-odds can be obtained similarly, as shown in the Figure \ref{fig:modp4}:
+
+```{r, echo=FALSE, warning=FALSE, out.width = "87.5%", fig.width = 10, fig.height = 4, dpi = 150, fig.align = "left", fig.cap = "\\label{fig:modp4} Log-Odds (Rating above 7) for the step model.", fig.pos = "H"}
+plot_model(step.model, show.values = TRUE, transform = NULL,
+           title = "Log-Odds (Rating above 7)", show.p = FALSE)
+```
+
+Consider using the estimated coefficients to quantify the effect of these four variables, the regression coefficients on the odds scale are given by:
+
+```{r, echo=FALSE}
+# Coefficients on the odds scale
+step.model.coef.exp. <- step.model %>%
+  coef() %>%
+  exp()
+step.model.coef.exp.
+```
+
+The point estimate and the corresponding 95% confidence interval for the odds scale can be obtained, as shown in the Figure \ref{fig:modp5}:
+
+```{r, echo=FALSE, warning=FALSE, out.width = "87.5%", fig.width = 10, fig.height = 4, dpi = 150, fig.align = "left", fig.cap = "\\label{fig:modp5} Odds (Rating above 7) for the step model.", fig.pos = "H"}
+plot_model(step.model, show.values = TRUE, 
+           title = "Odds (Rating above 7)", show.p = FALSE) +
+  theme(axis.text.x = element_text(size = 1))
+```
+
+This suggests that for two movies released one *year* apart, the  odds of a new movie having a rating above 7 is `r round(step.model.coef.exp.["year"],2)` times that of an old movie. Likewise, for every additional minute (*length*) in the duration of a movie, the odds of the movie having a rating above 7 decreases by a factor of `r round(step.model.coef.exp.["length"],2)`, indicating a slight decrease. As for the *budget*, for every additional one million US dollars invested in the production of a movie, the odds of the movie having a rating above 7 increase by a factor of `r round(step.model.coef.exp.["budget"],2)`. The influence of the genre is similar to what was discussed earlier.
+
+
+
+# Conclusion {#sec:conc}
+
+After a movie is released, it is important to pay attention to the audience's word of mouth, which is reflected in the ratings given by the general public on IMDB. We consider movies with ratings of 7 or higher as high-rated movies and explore which movie attributes affect the rating results.
+
+The following conclusion was drawn by modelling binary logistic regression with one categorical variable as an explanatory variable and by mixed modeling with multiple numerical variables as explanatory variables:
+
+* The *genres* of Action, Drama, and Romance have fewer high-rated movies, while Documentary and Short genres have more high-rated movies. This indicates that audiences prefer movies with logic and depth, rather than formulaic commercial films.
+
+* The *genres* of Animation and Comedy receive mixed ratings, but overall, there are more high-rated movies, which is in line with our impression of popular trends among the general audience.
+
+* In terms of numerical factors, the *year*, *length*, and *budget* are taken into account. However, the *votes*, representing the number of positive votes received by viewers, does not have a significant impact on the final rating of the movie, which may be due to its subjectivity.
+
+* The release year and production budget of a movie have a positive impact on its rating, indicating that people prefer new movies that match their current tastes. Moreover, the budget invested in a movie can greatly influence its production quality, providing people with new and exciting experiences and thus gaining more popularity. However, the length of a movie has a negative impact on its rating, indicating that people no longer enjoy the long narrative of old movies, which is related to today's fast-paced culture.
+
+Future work could include:
+
+* In addition to the movie attributes mentioned in the study, other movie attributes such as box office, investment in art and music, etc., may also have an impact on movie ratings. Not only the movie's inherent attributes, but other cultural factors such as language and actors may also cause certain differences. If more variables can be included, it will be more effective in improving the accuracy of the classifier's functionality.
+
+* In this study, the response variable was set to two categories, greater than 7 points or lower. If the response variable can be divided into more categories, such as high-rated movies, average-rated movies, and low-rated movies, it will be more discriminative.
+
+* The distribution of genres in the sample used in the study is uneven, as there were no *Romance* films with ratings above 7, which has led to errors in the model. Obtaining a more comprehensive sample would result in better model performance.
