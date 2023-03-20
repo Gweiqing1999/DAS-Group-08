@@ -1,5 +1,5 @@
 ---
-title: 'The Impact of film''s features on IMDB Ratings: A logistic Regression approach'
+title: 'The Impact of Film''s Properties on IMDB Ratings: A logistic Regression Approach'
 author: "Yujie Tang, Jialu FU, Weiqing GUO, Bashiru Mukaila, Wanding Wang"
 date: "2023-03-14"
 output: 
@@ -102,18 +102,25 @@ model.genre %>%
   summary()
 ```
 
+
+```{r coefs, echo=FALSE, include=FALSE}
+model.genre.coefs <- model.genre %>%
+  summary() %>%
+  coef()
+```
+
 From the output, the estimated coefficients for *Action (Intercept)*, *Drama*, and *Romance* are negative, suggesting that movies of these three genres are more likely to receive ratings below 7, consistent with our previous observation. However, the coefficient for *Romance* is not significant, which may be due to a lack of observations with ratings above 7. All other estimated coefficients are significant at the 5% level of significance.
 
 
 ### Model inference and interpretation
 
-The baseline category for our binary response is *Yes*, and the baseline category for our explanatory variable is *Action*. Hence the estimates from the logistic regression model are on the log-odds scale and apply to movies with a rating above 7:
+The baseline category for our binary response is *No*, and the baseline category for our explanatory variable is *Action*. Hence the estimates from the logistic regression model are on the log-odds scale and apply to movies with a rating above 7:
 
-
-$$\log(\frac{\hat{p}}{1-\hat{p}}) = -1.84 + 0 \cdot \mathrm{II}_{genre}({Action})$$
-$$\qquad \quad \; \log(\frac{\hat{p}}{1-\hat{p}}) = -1.84 + 2.55 \cdot \mathrm{II}_{genre}({Animation})$$
+$$\qquad \quad \; \log(\frac{\hat{p}}{1-\hat{p}}) = `r round(model.genre.coefs["(Intercept)", "Estimate"],2)`  + \beta \cdot \mathrm{II}_{genre}({\cdot})$$
 $$...$$
-where $\mathrm{II}_{genre}({\cdot})$ is an indicator function, that takes a specific movie genre as input and returns 1 if the input variable matches the genre, and 0 otherwise.
+where $\beta$ is `r round(model.genre.coefs["genreAnimation", "Estimate"],2)` for Animation, `r round(model.genre.coefs["genreComedy", "Estimate"],2)` for Comedy, `r round(model.genre.coefs["genreDocumentary", "Estimate"],2)` for Documentary, `r round(model.genre.coefs["genreDrama", "Estimate"],2)` for Drama, `r round(model.genre.coefs["genreRomance", "Estimate"],2)` for Romance, `r round(model.genre.coefs["genreShort", "Estimate"],2)` for Short films
+
+and $\mathrm{II}_{genre}({\cdot})$ is an indicator function, that takes a specific movie genre (excluding Action genre) as input and returns 1 if the input variable matches the genre, and 0 otherwise.
 
 The point estimate and the corresponding 95% confidence interval for the log-odds of each movie genre can be obtained, as shown in the Figure \ref{fig:modp1}:
 
@@ -126,9 +133,10 @@ Consider using the estimated coefficients to quantify the effect of genre, the r
 
 ```{r}
 # Coefficients on the odds scale
-model.genre %>%
+model.genre.coefs.exp <- model.genre %>%
   coef() %>%
   exp()
+model.genre.coefs.exp
 ```
 
 Similarly, the point estimate and the corresponding 95% confidence interval for the odds scale of each movie genre can be obtained, as shown in the Figure \ref{fig:modp2}:
@@ -139,7 +147,7 @@ plot_model(model.genre, show.values = TRUE,
   theme(axis.text.x = element_text(size = 2))
 ```
 
-The *Action (Intercept)* gives us in the Action movie genre, the probability of a high rating is approximately 0.16 times that of a low rating. And the odds of the rating being above 7 for *Animation* are 12.76 times greater than the odds if the movies are *Action*. For the movie genres *Documentary* and *Short*, the probability of having a high rating is 68.63 and 408.14 times higher than that of *Action*, respectively.
+The *Action (Intercept)* gives us in the Action movie genre, the odd of a high rating is approximately `r round(model.genre.coefs.exp["(Intercept)"],2)` times that of a low rating. And the odds of the rating being above 7 for *Animation* are `r round(model.genre.coefs.exp["genreAnimation"],2)` times greater than the odds if the movies are *Action*. For the movie genres *Documentary* and *Short*, the odds of having a high rating is `r round(model.genre.coefs.exp["genreDocumentary"],2)` and `r round(model.genre.coefs.exp["genreShort"],2)` times higher than that of *Action*, respectively.
 
 Next, we calculate the estimated probability of a rating above 7 for each movie genre using the following formula:
 
@@ -227,6 +235,13 @@ step.model <- stepAIC(full.model, direction = "both",
 summary(step.model)
 ```
 
+```{r, echo=FALSE, include=FALSE}
+step.model.coef. <- step.model %>%
+  coef()
+round(step.model.coef.["(Intercept)"],2)
+```
+
+
 The best model removed the *votes* variable from the full model, indicating that its impact on the rating was not significant when considering other variables, which resulted in a relatively poor model fit. Additionally, due to 131 missing values in *length*, it was removed from the analysis. The model we obtained is of the form:
 
 $$g(p_i) = log(\frac{p_i}{1-p_i}) = \alpha + \beta_1 \cdot year_i + \beta_2 \cdot length_i + \beta_3 \cdot budget_i + \beta_4 \cdot genre_i$$
@@ -237,7 +252,7 @@ From the output, the estimated coefficients for *length* is negative, suggesting
 
 The estimates from the logistic regression model are on the log-odds scale and apply to movies with a rating above 7:
 
-$$g(\hat{p_i}) = log(\frac{\hat{p_i}}{1-\hat{p_i}}) = -23.86 + 0.01 \cdot year_i - 0.06 \cdot length_i + 0.51 \cdot budget_i + \hat{\beta_4} \cdot \mathrm{II}_{genre}({\cdot})$$
+$$g(\hat{p_i}) = log(\frac{\hat{p_i}}{1-\hat{p_i}}) = `r round(step.model.coef.["(Intercept)"],2)` + `r round(step.model.coef.["year"],2)` \cdot year_i `r round(step.model.coef.["length"],2)` \cdot length_i + `r round(step.model.coef.["budget"],2)` \cdot budget_i + \hat{\beta_4} \cdot \mathrm{II}_{genre}({\cdot})$$
 
 The point estimate and the corresponding 95% confidence interval for the log-odds can be obtained similarly, as shown in the Figure \ref{fig:modp4}:
 
@@ -250,9 +265,10 @@ Consider using the estimated coefficients to quantify the effect of these four v
 
 ```{r}
 # Coefficients on the odds scale
-step.model %>%
+step.model.coef.exp. <- step.model %>%
   coef() %>%
   exp()
+step.model.coef.exp.
 ```
 
 The point estimate and the corresponding 95% confidence interval for the odds scale can be obtained, as shown in the Figure \ref{fig:modp5}:
@@ -263,16 +279,16 @@ plot_model(step.model, show.values = TRUE,
   theme(axis.text.x = element_text(size = 1))
 ```
 
-This suggests that for two movies released one *year* apart, the  odds of a new movie having a rating above 7 is 1.01 times that of an old movie. Likewise, for every additional minute (*length*) in the duration of a movie, the odds of the movie having a rating above 7 decreases by a factor of 0.94, indicating a slight decrease. As for the *budget*, for every additional one million US dollars invested in the production of a movie, the odds of the movie having a rating above 7 increase by a factor of 1.67. The influence of the genre is similar to what was discussed earlier.
+This suggests that for two movies released one *year* apart, the  odds of a new movie having a rating above 7 is `r round(step.model.coef.exp.["year"],2)` times that of an old movie. Likewise, for every additional minute (*length*) in the duration of a movie, the odds of the movie having a rating above 7 decreases by a factor of `r round(step.model.coef.exp.["length"],2)`, indicating a slight decrease. As for the *budget*, for every additional one million US dollars invested in the production of a movie, the odds of the movie having a rating above 7 increase by a factor of `r round(step.model.coef.exp.["budget"],2)`. The influence of the genre is similar to what was discussed earlier.
 
 
-# Conclusion {#sec:conc}
+
 
 ```{r}
 
 ```
 
-
+# Conclusion {#sec:conc}
 
 
 
