@@ -5,6 +5,7 @@ date: "2023-03-14"
 output: 
   pdf_document:
           number_sections: yes
+          latex_engine: xelatex
 fig_caption: yes
 ---
 
@@ -57,7 +58,7 @@ kable(head(group_08), caption = '\\label{tab:head} Highlight of the IMDB data',b
      kable_styling(font_size = 3, latex_options = c("scale_down", "hold_position"))
 ```
 
-From the summary statistics in table \ref{tab:sums} and figure \ref{fig:chart}, we can see that the year of release of the films is between `r min(imdb_group_08$year)` to `r max(imdb_group_08$year)` and the year with the highest release of films rated is `r names(table(imdb_group_08$year))[which.max(table(imdb_group_08$year))]`. The minimum budget for film in the data set is `r min(imdb_group_08$budget)` million while the maximum is `r max(imdb_group_08$budget)` million. It is also clear that Action films is the highest genre in terms of frequency.
+From the summary statistics in table \ref{tab:sums}, we can see that the year of release of the films is between `r min(imdb_group_08$year)` to `r max(imdb_group_08$year)` and the year with the highest release of films rated is `r names(table(imdb_group_08$year))[which.max(table(imdb_group_08$year))]`. The minimum budget for film in the data set is `r min(imdb_group_08$budget)` million while the maximum is `r max(imdb_group_08$budget)` million. It is also clear that Action films is the highest genre in terms of frequency.
 
 ```{r expl4, echo=FALSE}
 # Displaying the summary statistics of the numerical variables
@@ -65,41 +66,6 @@ From the summary statistics in table \ref{tab:sums} and figure \ref{fig:chart}, 
 kable(summary(imdb_group_08[c("year", "length", "budget", "votes", "rating")]), caption = '\\label{tab:sums} Summary statistics of the numerical variables',booktabs = TRUE)%>%
      kable_styling(font_size = 7, latex_options = c("scale_down", "hold_position"))
 ```
-
-
-```{r chart, echo=FALSE, warning=FALSE, out.width='100%', fig.align = "center", fig.cap = "\\label{fig:chart} Distribution of Film's Properties.", fig.pos = "H"}
-p1 <- ggplot(data=imdb_group_08, aes(x=genre)) + 
-       geom_bar(fill="lightblue") + 
-       xlab("Genre") +
-       ylab("Films") +
-       theme(axis.text.x=element_text(angle=100, hjust=1, vjust=0))
-p2 <- ggplot(data=imdb_group_08, aes(x=year)) + 
-       geom_bar(fill="lightblue") + 
-       xlab("Year") +
-       ylab("Films") +
-       theme(axis.text.x=element_text(angle=100, hjust=1, vjust=0))
-p3<- ggplot(data=imdb_group_08, aes(x=length)) + 
-  geom_bar(fill="lightblue") + 
-  xlab("Length") +
-  ylab("Films") +
-  theme(axis.text.x=element_text(angle=100, hjust=1, vjust=0))
-p4 <- ggplot(data=imdb_group_08, aes(x=rating)) + 
-  geom_histogram(fill="lightblue") +
-  geom_vline(xintercept=mean(imdb_group_08$rating), colour='red', linetype='longdash') +
-  geom_text(label='Mean', x=55, y=60, hjust='center', size=3) +
-  xlab("Rating") +
-  ylab("Films")
-p5 <- ggplot(data=imdb_group_08, aes(x=budget)) + 
-  geom_histogram(binwidth = 2,fill="lightblue") +
-  xlab("Budget") +
-  ylab("Films")
-p6 <- ggplot(data=imdb_group_08, aes(x=votes)) + 
-  geom_histogram(binwidth = 2, fill="lightblue") +
-  xlab("Votes") +
-  ylab("Films")
-grid.arrange(p2, p3, p4, p5, p6, p1, ncol=2)
-```
-
 
 From the scatterplot in figure \ref{fig:scatp}, we can see that there is a negative correlation between the length of the film and its rating. This implies that films with longer length tend to be rated low. There is a positive correlation between the budget of film production and its rating, however, the correlation is weak.
 
