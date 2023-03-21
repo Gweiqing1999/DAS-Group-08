@@ -121,7 +121,3 @@ ggplot(data = IMDP_Barchat, aes(x = Genre, y = number, fill = Rating)) +
   labs(x = "Genre", y = "Number of Film")
 ```
 
-
-# Formal Data Analysis {#sec:form}
-
-# Conclusion {#sec:conc}

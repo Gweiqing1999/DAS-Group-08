@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999994 (TeX Live 2022) (preloaded format=xelatex 2023.3.11)  21 MAR 2023 09:49
+This is XeTeX, Version 3.141592653-2.6-0.999994 (TeX Live 2022) (preloaded format=xelatex 2023.3.11)  21 MAR 2023 10:01
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -803,6 +803,12 @@ LaTeX Font Info:    Trying to load font information for U+msb on input line 88.
 (c:/Users/mbashiru/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
+
+LaTeX Warning: Reference `sec:form' on page 1 undefined on input line 108.
+
+
+LaTeX Warning: Reference `sec:conc' on page 1 undefined on input line 109.
+
 LaTeX Font Info:    Calculating math sizes for size <3> on input line 139.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/m/n' will be
 (Font)              scaled to size 3.0pt on input line 139.
@@ -849,10 +855,13 @@ File: Intro-and-Exploratory-analysis_files/figure-latex/col-1.pdf Graphic file (
 <use Intro-and-Exploratory-analysis_files/figure-latex/col-1.pdf>
 [4] (./Intro-and-Exploratory-analysis.aux)
 
+LaTeX Warning: There were undefined references.
+
+
 LaTeX Warning: There were multiply-defined labels.
 
 Package rerunfilecheck Info: File `Intro-and-Exploratory-analysis.out' has not changed.
-(rerunfilecheck)             Checksum: 8F6CA43B3806DDCFF4B45EDFE8048BC6;519.
+(rerunfilecheck)             Checksum: 9BC7B6B6C48233FE8BAF28E6C4C2EB7E;277.
  ) 
 Here is how much of TeX's memory you used:
  18124 strings out of 478683
